@@ -1,3 +1,4 @@
+#marha614, wiler441, emmst476
 #Step 1
 
 opt = read.csv("./optdigits.csv", header = FALSE)
