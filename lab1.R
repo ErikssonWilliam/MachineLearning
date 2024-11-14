@@ -45,8 +45,13 @@ digit_8= prob[index, 8]
 easiest_cases = index[order(digit_8, decreasing =TRUE)[1:2]]
 hardest_cases = index[order(digit_8, decreasing =FALSE)[1:3]]
 
-for (i in 1:2) {
-X=as.matrix(test[easiest_cases[i],-c(65)])
-heatmap(X, Rowv=NA, Colv=NA, col=heat.colors(12))
-}
-#Continue here
+
+X19= matrix(as.numeric(test[19,-c(65)]), nrow=8, ncol =8) # Hard cases
+heatmap(X19, Rowv=NA, Colv=NA, col=heat.colors(12), main = "Heat map of test case 19")
+#C
+X12 = matrix(as.numeric(test[12,-c(65)]), nrow=8, ncol =8)
+heatmap(X12, Rowv=NA, Colv=NA, col=heat.colors(12), main = "Heat map of test case 12")
+
+X20 = matrix(as.numeric(test[20,-c(65)]), nrow=8, ncol =8)
+heatmap(X20, Rowv=NA, Colv=NA, col=heat.colors(12), main = "Heat map of test case 20")
+
