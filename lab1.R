@@ -39,7 +39,7 @@ m1=kknn(as.factor(V65)~., train, train, k=30, kernel="rectangular")
 Pred=m1$fitted.values
 confusion_table_train = table(train$V65, Pred)
 confusion_table_train
-train_error = (1- sum(diag(confusion_table)) / sum(confusion_table))
+train_error = (1- sum(diag(confusion_table_train)) / sum(confusion_table_train))
 train_error
 
 #step3
@@ -64,6 +64,7 @@ for (i in seq_along(hardest_cases)) {
 
 
 #Step 4
+
 numberOfK = 30
 valid_errors = matrix(numberOfK)
 
@@ -86,3 +87,4 @@ confusion_table = table(test$V65, Pred)
 train_error = (1- sum(diag(confusion_table)) / sum(confusion_table))
 train_error
 valid_errors[3]
+
