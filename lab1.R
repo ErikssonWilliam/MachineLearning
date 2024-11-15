@@ -31,7 +31,7 @@ m1=kknn(as.factor(V65)~., train, test, k=30, kernel="rectangular")
 Pred=m1$fitted.values
 confusion_table_test = table(test$V65, Pred)
 confusion_table_test
-test_error = (1- sum(diag(confusion_table)) / sum(confusion_table))
+test_error = (1- sum(diag(confusion_table_test)) / sum(confusion_table_test))
 test_error
 #Most errors (8,1) (1,2) (4,7) (5,9), 5,4% is a reasonable error percentage.
 
@@ -65,26 +65,49 @@ for (i in seq_along(hardest_cases)) {
 
 #Step 4
 
+
 numberOfK = 30
-valid_errors = matrix(numberOfK)
+valid_errors = numeric(numberOfK) 
+train_errors = numeric(numberOfK) 
 
 for (i in 1:numberOfK) {
-m1=kknn(as.factor(V65)~., train, valid, k=i, kernel="rectangular")
-Pred=m1$fitted.values
-confusion_table = table(valid$V65, Pred)
-
-valid_errors[i] = (1- sum(diag(confusion_table)) / sum(confusion_table))
-
+  # Validation error
+  m1_valid = kknn(as.factor(V65)~., train, valid, k=i, kernel="rectangular")
+  Pred_valid = m1_valid$fitted.values
+  confusion_table_valid = table(valid$V65, Pred_valid)
+  valid_errors[i] = (1 - sum(diag(confusion_table_valid)) / 
+                       sum(confusion_table_valid))
+  
+  # Training error
+  m1_train = kknn(as.factor(V65)~., train, train, k=i, kernel="rectangular")
+  Pred_train = m1_train$fitted.values
+  confusion_table_train = table(train$V65, Pred_train)
+  train_errors[i] = (1 - sum(diag(confusion_table_train)) / 
+                       sum(confusion_table_train))
 }
 
-plot(1:numberOfK, valid_errors, type = "o", col = "blue", xlab = "Value of K", ylab = "Validation Misclassification Error", main = " Validation misclassification Errors for Different K Values")
+# Plot both training and validation errors
+plot(1:numberOfK, valid_errors, type = "o", col = "blue", 
+     xlab = "Value of K", 
+     ylab = "Misclassification Error", 
+     main = "Training and Validation Misclassification Errors for Different K Values")
+
+lines(1:numberOfK, train_errors, type = "o", col = "red")
+
+
+legend("topleft", legend = c("Validation Error", "Training Error"), 
+       col = c("blue", "red"), lty = 1, pch = 1)
+
 valid_errors[3]
+train_errors[3]
 
 #Optimal K is the one that gives lowest misclassification error. K*=3
 m1=kknn(as.factor(V65)~., train, test, k=3, kernel="rectangular")
 Pred=m1$fitted.values
 confusion_table = table(test$V65, Pred)
-train_error = (1- sum(diag(confusion_table)) / sum(confusion_table))
-train_error
-valid_errors[3]
+test_error = (1- sum(diag(confusion_table)) / sum(confusion_table))
+test_error
+
+
+# Step 5
 
