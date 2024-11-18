@@ -111,3 +111,31 @@ test_error
 
 # Step 5
 
+numberOfK = 30
+valid_errors = numeric(numberOfK) 
+train_errors = numeric(numberOfK) 
+
+cross_entropy <- function(true_labels, pred_prob) {
+  epsilon = 1e-15
+  true_one_hot = model.matrix(~ true_labels - 1) #Creates k dummy variables, rows represents individual data points, columns represent each unique class in true_labels
+  pred_probs = pmax(pred_prob, epsilon)
+  return(-mean(rowSums(true_one_hot * log(pred_probs))))
+}
+
+
+valid$V65<- factor(valid$V65)
+levels(valid$V65)
+for (i in 1:numberOfK) {
+  # Validation error
+  m1_valid = kknn(as.factor(V65)~., train, valid, k=i, kernel="rectangular")
+  pred_prob = m1_valid$prob
+  valid_errors[i] = cross_entropy(valid$V65,pred_prob)
+ 
+}
+
+plot(1:numberOfK, valid_errors, type = "o", col = "blue", 
+     xlab = "Value of K", 
+     ylab = "Misclassification Error", 
+     main = "Validation cross entropy errors for Different K Values")
+
+which.min(valid_errors)
