@@ -1,22 +1,14 @@
 #marha614, wiler441, emmst476
+
 #Step 1
-
 park = read.csv("./parkinsons.csv", header = TRUE)
-
 n = dim(park)[1]
-
 set.seed(123)
-
 id = sample(1:n, floor(n*0.6))
-
 train = park[id,]
-
 id1=setdiff(1:n, id)
-
 set.seed(123)
-
 id2=sample(id1,floor(n*0.4))
-
 test = park[id2,]
 
 library(caret)
@@ -26,6 +18,7 @@ trainS=predict(params, train)
 testS=predict(params, test)
 
 # Step 2
+
 library(dplyr)
 # Regression
 df=trainS%>%select(motor_UPDRS, Jitter...:PPE)
@@ -48,57 +41,50 @@ summary(m1)
 
 #Step 3
 
-#Initialize sigma 
+#Initialize variabels
 sigma = summary(m1)$sigma
+lambda = 0.1
 
-#Initialize theta
 coefficients <- summary(m1)$coefficients # Find the start and end indices of the row names you are interested in 
 start_index <- which(rownames(coefficients) == "Jitter...") 
 end_index <- which(rownames(coefficients) == "PPE") # Select the rows in this range and the "Estimate" column 
 theta <- coefficients[start_index:end_index, "Estimate"]
+params = c(sigma, theta)
 
 #Log likelihood function
-
-loglik = function(model) {
+loglik = function(theta, sigma) {
   
   y = as.matrix(trainS$motor_UPDRS) #dependent variable
   X = trainS %>% select(Jitter...:PPE) %>% as.matrix() #independent variables, from Jitter...:PPE
   n=nrow(trainS)
-  
-  sigma = model$sigma
-  
-  coefficients <- model$coefficients # Find the start and end indices of the row names you are interested in 
-  start_index <- which(rownames(coefficients) == "Jitter...") 
-  end_index <- which(rownames(coefficients) == "PPE") # Select the rows in this range and the "Estimate" column 
-  theta <- coefficients[start_index:end_index, "Estimate"]
-  
-  y_hat = X %*% theta
-  
+  #y_hat = X %*% theta # unused?
   log_likelihood = -n / 2 * log(2 * pi * sigma^2) - sum ((y-X %*% theta)^2) / (2 * sigma^2)
   return(log_likelihood)
 }
-loglik(summary(m1))
+loglik(theta, sigma)
 
 #Ridge function
-
-ridge_function = function(theta, sigma, lambda, X, Y) { 
-  return(-log_likelihood(theta, sigma, X, Y) + lambda * sum(theta^2)) 
+ridge_function = function(params, lambda) {
+  sigma = params[1] 
+  theta = params[-1]
+  return(-loglik(theta, sigma) + lambda * sum(theta^2)) 
 }
+ridge_function(params, lambda)
 
 #Ridge opt function
-
-RidgeOpt <- function(X, Y, theta_init, sigma_init, lambda) { 
-  # Combine theta and sigma into a single vector for optimization 
-  init_params <- c(theta_init, sigma_init) # Use optim() with BFGS method, directly referencing ridge_function 
-  result <- optim( par = init_params, fn = ridge_function, # Directly call ridge_function 
-                   method = "BFGS", X = X, Y = Y, lambda = lambda # Pass additional arguments 
+RidgeOpt <- function(params, lambda) { 
+  result <- optim( par = params, # Use optim() with BFGS method, directly referencing ridge_function
+                   fn = ridge_function, # Directly call ridge_function 
+                   method = "BFGS", 
+                   lambda = lambda # Pass additional arguments 
   ) 
   # Extract optimized parameters 
-  optimized_theta <- result$par[-length(result$par)] # All but last value 
-  optimized_sigma <- result$par[length(result$par)] # Last value 
+  optimized_theta <- result$par[-1]
+  optimized_sigma <- result$par[1] 
   # Return the results as a list 
   return(list(theta = optimized_theta, sigma = optimized_sigma, ridge_value = result$value)) 
 }
+RidgeOpt(params, lambda)
 
 #DF function
 
@@ -106,5 +92,45 @@ DF <- function(X, lambda) {
   XtX <- t(X) %*% X 
   I <- diag(ncol(X)) # Identity matrix of the same size as number of columns in X 
   S_lambda <- X %*% solve(XtX + lambda * I) %*% t(X)
-  return(sum(diag(S_lamba)))
+  return(sum(diag(S_lambda)))
 }
+
+#Step 4
+X_train <- trainS %>% select(Jitter...:PPE) %>% as.matrix() 
+X_test <- testS %>% select(Jitter...:PPE) %>% as.matrix() 
+
+#lambda = 1
+opt1 = RidgeOpt(params, 1)
+pred_train <- X_train %*% opt1$theta 
+MSE_train1 <- mean((trainS$motor_UPDRS - pred_train)^2)
+MSE_train1
+pred_test <- X_test %*% opt1$theta 
+MSE_test1 <- mean((testS$motor_UPDRS - pred_test)^2)
+MSE_test1
+
+#lambda = 100
+opt100 = RidgeOpt(params, 100)
+pred_train <- X_train %*% opt100$theta 
+MSE_train100 <- mean((trainS$motor_UPDRS - pred_train)^2)
+MSE_train100
+pred_test <- X_test %*% opt100$theta 
+MSE_test100 <- mean((testS$motor_UPDRS - pred_test)^2)
+MSE_test100
+
+#lambda = 1000
+opt1000 = RidgeOpt(params, 1000)
+pred_train <- X_train %*% opt1000$theta 
+MSE_train1000 <- mean((trainS$motor_UPDRS - pred_train)^2)
+MSE_train1000
+pred_test <- X_test %*% opt1000$theta 
+MSE_test1000 <- mean((testS$motor_UPDRS - pred_test)^2)
+MSE_test1000
+
+DF(X_train, 1)
+DF(X_test, 1)
+
+DF(X_train, 100)
+DF(X_test, 100)
+
+DF(X_train, 1000)
+DF(X_test, 1000)
