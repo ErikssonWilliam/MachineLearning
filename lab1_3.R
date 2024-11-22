@@ -45,6 +45,7 @@ plot(train$age,train$glucose_conc, main="predicted plasma glucose concentration 
 #Decision boundary for logistic regression is linear. (y = kx + m) Need to calculate the k and the m'
 #Decision boundary is where logit is 0 (prob_eq = 0.5)
 #=> glucose_conc = (-beta(0)/beta(2) = m value, -beta(1)/beta(2) = k)
+
 k = coefficients["age"]/-coefficients["glucose_conc"]
 m = coefficients["(Intercept)"]/-coefficients["glucose_conc"]
 
