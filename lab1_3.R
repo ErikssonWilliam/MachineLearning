@@ -89,3 +89,29 @@ plot(train$age, train$glucose_conc,
      ylab="plasma glucose concentration", 
      col = ifelse(pred3 == "diabetes", "green", "red"), 
      pch=19)
+
+#Step 5
+pima$Z1 = pima$V2^4
+pima$Z2 = pima$V2^3 * pima$V8
+pima$Z3 = pima$V2^2 * pima$V8^2
+pima$Z4 = pima$V2 * pima$V8^3
+pima$Z5 = pima$V8^4
+
+model = glm(V9 ~ V2 + V8 + Z1 + Z2 + Z3 + Z4 + Z5, data = pima, family = binomial)
+pred = predict(model, type = "response")
+pred_threshold = ifelse(pred >= 0.5, 1, 0)
+
+misclass_error = mean(pred_threshold != pima$V9)
+misclass_error
+
+colors = ifelse(pred_threshold == 1, "red", "blue")
+plot(pima[,8], pima[,2],
+     col = colors,
+     main = "Predicted Diabetes based on Age and Plasma Glucose",
+     xlab = "Age",
+     ylab = "Plasma Glucose Concentration",
+     pch = 19)
+
+legend("topright", legend = c("Predicted No Diabetes", "Predicted Diabetes",), 
+       col = c("blue", "red"), pch = c(19, 19), lty = c(NA, NA), lwd = c(NA, NA))
+
