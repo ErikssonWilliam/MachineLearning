@@ -117,7 +117,8 @@ train_errors = numeric(numberOfK)
 
 cross_entropy <- function(true_labels, pred_prob) {
   epsilon = 1e-15
-  true_one_hot = model.matrix(~ true_labels - 1) #Creates k dummy variables, rows represents individual data points, columns represent each unique class in true_labels
+  true_one_hot = model.matrix(~ true_labels - 1) #Creates k dummy variables, 
+  #rows represents individual data points, columns represent each unique class in true_labels
   pred_probs = pmax(pred_prob, epsilon)
   return(-mean(rowSums(true_one_hot * log(pred_probs))))
 }
