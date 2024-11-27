@@ -38,8 +38,8 @@ pred = ifelse(prob > 0.5, "diabetes", "no diabetes")
 train_confusion_matrix=table(train$diabetes, pred)
 train_confusion_matrix
 
-mc_error = sum(diag(train_confusion_matrix)) / length(pred) 
-#The incorrect classifications are in the diagonal of the confusion matrix. Length pred represents the total no of predictions made
+mc_error = sum(1 - diag(train_confusion_matrix)) / length(pred) 
+#The correct classifications are in the diagonal of the confusion matrix. Length pred represents the total no of predictions made
 mc_error
 
 plot(train$age, train$glucose_conc, 

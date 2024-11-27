@@ -3,17 +3,17 @@
 #Step 1
 park = read.csv("./parkinsons.csv", header = TRUE)
 n = dim(park)[1]
-set.seed(123)
+set.seed(12345)
 id = sample(1:n, floor(n*0.6))
 train = park[id,]
 id1=setdiff(1:n, id)
-set.seed(123)
+set.seed(12345)
 id2=sample(id1,floor(n*0.4))
 test = park[id2,]
 
 library(caret)
 
-params=preProcess(train, method = "scale")
+params=preProcess(train, method = "scale") #scale data, features have mean of 0 and std of 1
 trainS=predict(params, train)
 testS=predict(params, test)
 
@@ -28,7 +28,7 @@ coef(m1)
 #Training MSE
 
 Preds_train=predict(m1, trainS)
-train_MSE=mean((df$motor_UPDRS-Preds_train)^2)
+train_MSE=mean((df$motor_UPDRS-Preds_train)^2) #Mean Squared Errors
 train_MSE
 
 #Test MSE
@@ -51,7 +51,7 @@ end_index <- which(rownames(coefficients) == "PPE") # Select the rows in this ra
 theta <- coefficients[start_index:end_index, "Estimate"]
 params = c(sigma, theta)
 
-#Log likelihood function
+#Log likelihood function, measures how well a statistical model fits the observed data
 loglik = function(theta, sigma) {
   
   y = as.matrix(trainS$motor_UPDRS) #dependent variable
@@ -63,15 +63,15 @@ loglik = function(theta, sigma) {
 }
 loglik(theta, sigma)
 
-#Ridge function
+#Ridge function, prevent overfitting by adding a penalty to the size of the coefficents
 ridge_function = function(params, lambda) {
   sigma = params[1] 
-  theta = params[-1]
+  theta = params[-1] #Extracts all elements, excluding the first
   return(-loglik(theta, sigma) + lambda * sum(theta^2)) 
 }
 ridge_function(params, lambda)
 
-#Ridge opt function
+#Ridge opt function, optimized the parameters of ta ridge regression model
 RidgeOpt <- function(params, lambda) { 
   result <- optim( par = params, # Use optim() with BFGS method, directly referencing ridge_function
                    fn = ridge_function, # Directly call ridge_function 
@@ -88,11 +88,11 @@ RidgeOpt(params, lambda)
 
 #DF function
 
-DF <- function(X, lambda) {
+DF <- function(X, lambda) { # Degrees of freedom
   XtX <- t(X) %*% X 
   I <- diag(ncol(X)) # Identity matrix of the same size as number of columns in X 
-  S_lambda <- X %*% solve(XtX + lambda * I) %*% t(X)
-  return(sum(diag(S_lambda)))
+  S_lambda <- X %*% solve(XtX + lambda * I) %*% t(X) #Smoothing matrix. lambda*I is the regularization term
+  return(sum(diag(S_lambda))) #Sum of diagnal elements equals degrees of freedom
 }
 
 #Step 4
