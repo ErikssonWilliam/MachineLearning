@@ -82,8 +82,9 @@ lasso_cv = cv.glmnet(x_train, y_train, family = "gaussian", #Gaussian, implies t
                alpha = 1)
 plot(lasso_cv)
 
-log(lasso_cv$lambda.min) #Optimal lamba
+log(lasso_cv$lambda.min) #Optimal lambda
 #Which variables are included
+
 num_var = sum(coef(lasso_cv, s="lambda.min") != 0) 
 num_var #Exclude intercept term so answer is 8
 
