@@ -48,5 +48,36 @@ for (i in 2:50) {
 
 plot(2:50, train_deviance[2:50], type="b", col="red", ylim = c(8000, 12000))
 points(2:50, validation_deviance[2:50], type ="b", col="blue")
-which.min(validation_deviance[2:50]) + 1 # number of leaves 
+
+best_leaves = which.min(validation_deviance[2:50]) + 1 # number of leaves, outputs 22 
+best = prune.tree(tree_deviance, best = best_leaves) 
+plot(best)
+text(best)
+summary(best)
+print(best)
+
+#Step 4
+test[] = lapply(test, function(x) if (is.character(x)) as.factor(x) else x)
+pred = predict(best, test, type = "class")
+confusion_matrix = table(test$y, pred)
+confusion_matrix
+TP = confusion_matrix[1,1]
+TN = confusion_matrix[2,2]
+FP = confusion_matrix[2,1]
+FN = confusion_matrix[1,2]
+N = TN + FP
+P = FN + TP
+
+(TP + TN)/ (P + N) #Calculates Accuracy
+
+precision = TP / (TP + FP)
+recall = TP / P
+2 * precision * recall / (precision + recall) # calculates F1
+
+#Step 5
+
+prob = predict(best, test, type = "vector") 
+pred = ifelse(prob[,"yes"]/prob[,"no"]>1/5, "yes", "no")
+table(test$y, pred) #something is wrong here
+
 
