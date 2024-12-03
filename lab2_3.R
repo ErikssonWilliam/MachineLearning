@@ -14,8 +14,8 @@ eigen(S)$values[1:2]/sum(eigen(S)$values) #proportion of variance for the first 
 
 #Step 2
 res = princomp(data)
-U=res$loadings
-plot(U[,1], main="Traceplot, PC1")
+U = res$loadings
+plot(U[,1], main ="Traceplot, PC1")
 top_5_indices = order(abs(U[, 1]), decreasing = TRUE)[1:5]
 top_5_values = U[top_5_indices, 1]
 
@@ -34,9 +34,9 @@ n = dim(com)[1]
 set.seed(12345)
 id = sample(1:n, floor(n*0.5))
 train = com[id,]
-id1=setdiff(1:n, id)
+id1 = setdiff(1:n, id)
 set.seed(12345)
-id2=sample(id1,floor(n*0.5))
+id2 = sample(id1,floor(n*0.5))
 test = com[id2,]
 
 #Preprocces train and test to scale the data without target variable
@@ -45,6 +45,7 @@ test_data = test %>% select(-ViolentCrimesPerPop)
 scaled_train = preProcess(train_data, method = "scale")
 train_scaled = predict(scaled_train, newdata = train_data)
 test_scaled = predict(scaled_train, newdata = test_data)
+
 
 ##SHOULD YOU SCALE TARGET VARIABEL SEPERATLY; WITH PREDICTORS; NOT AT ALL
 #implemented without scaling for target variable below:
@@ -55,21 +56,43 @@ test_predictions = predict(lm_model, newdata = data.frame(test_scaled))
 mean((train_predictions - train$ViolentCrimesPerPop) ^ 2) #Train mse
 mean((test_predictions - test$ViolentCrimesPerPop) ^ 2) #Test mse
 
+
 #Step 4
 
-cost_function <- function(theta, X, y) {
+theta = rep(0, ncol(train_scaled))
+TestE = c()
+TrainE = c()
+k=0
+
+cost_f= function(theta){
+  X = as.matrix(train_scaled)
+  y = train$ViolentCrimesPerPop
   n = nrow(X)
-  cost = (1 / n) * sum((X %*% theta - y)^2) # I HOPE THIS IS CORRECT?!
+  cost = (1 / n) * sum((X %*% theta - y)^2)
+  
+  X_t = as.matrix(test_scaled)
+  y_t = test$ViolentCrimesPerPop
+  n_t = nrow(X_t)
+  error_test = (1 / n_t) * sum((X_t %*% theta - y_t)^2)
+    
+  .GlobalEnv$k = .GlobalEnv$k + 1
+  .GlobalEnv$TrainE[.GlobalEnv$k] = cost
+  .GlobalEnv$TestE[.GlobalEnv$k] = error_test
   return(cost)
 }
 
-theta = rep(0, ncol(train_scaled))
+res=optim(par = theta, fn=cost_f,  method="BFGS")
+start_iteration = 500
+plot_range = start_iteration:length(TrainE)
 
-optim = optim(
-  par = theta,
-  fn = cost_function,
-  X = as.matrix(train_scaled),
-  y = train$ViolentCrimesPerPop,
-  method = "BFGS"
-  )
-optim$par
+plot(plot_range, TrainE[plot_range], type="l", col="blue", ylim = range(c(train_errors, test_errors)),
+     xlab = "Iteration", ylab = "Error", main = "Training and Test Errors")
+points(plot_range, TestE[plot_range], type="l", col="red")
+legend("topright", legend = c("Train Error", "Test Error"), 
+       col = c("blue", "red"), lty = 1)
+
+#Early stopping criteria = choose iteration with lowest error
+optimal_iteration = which.min(test_errors)
+optimal_iteration
+train_errors[optimal_iteration]
+test_errors[optimal_iteration]
