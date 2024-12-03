@@ -61,10 +61,10 @@ test[] = lapply(test, function(x) if (is.character(x)) as.factor(x) else x)
 pred = predict(best, test, type = "class")
 confusion_matrix = table(test$y, pred)
 confusion_matrix
-TP = confusion_matrix[1,1]
-TN = confusion_matrix[2,2]
-FP = confusion_matrix[2,1]
-FN = confusion_matrix[1,2]
+TP = confusion_matrix[2,2]
+TN = confusion_matrix[1,1]
+FP = confusion_matrix[1,2]
+FN = confusion_matrix[2,1]
 N = TN + FP
 P = FN + TP
 
@@ -76,8 +76,64 @@ recall = TP / P
 
 #Step 5
 
-prob = predict(best, test, type = "vector") 
-pred = ifelse(prob[,"yes"]/prob[,"no"]>1/5, "yes", "no")
-table(test$y, pred) #something is wrong here
+prob = predict(best, test, type = "vector")
+
+# Create the loss matrix
+
+pred = ifelse(prob[,"yes"]/prob[,"no"]>=1/5, "yes", "no")
+new_confusion= table(test$y, pred) #something is wrong here
+new_confusion
+
+summary(test$y)
+
+TP = new_confusion[2,2]
+TN = new_confusion[1,1]
+FP = new_confusion[1,2]
+FN = new_confusion[2,1]
+N = TN + FP
+P = FN + TP
+
+(TP + TN)/ (P + N) #Calculates Accuracy
+
+precision = TP / (TP + FP)
+precision
+recall = TP / P
+recall
+2 * precision * recall / (precision + recall) # calculates F1
+
+#Step 6, no where near finished
+
+prob = predict(best, test, type = "vector")
+
+# Create the loss matrix
+
+thresholds = seq(0.05, 0.95, by = 0.05)
+TPR_values = numeric(length(thresholds)) 
+FPR_values = numeric(length(thresholds))
 
 
+for (threshold in thresholds) {# Apply threshold to predictions
+  
+  pred = ifelse(prob[,"yes"] > threshold, "yes", "no") # Create confusion matrix 
+  
+  new_confusion = table(test$y, pred) # Extract confusion matrix values 
+  
+  TP = new_confusion["yes", "yes"] 
+  TN = new_confusion["no", "no"] 
+  FP = new_confusion["no", "yes"] 
+  FN = new_confusion["yes", "no"]
+  N = TN + FP 
+  P = FN + TP
+  TPR = TP/P
+  FPR = FP/N
+  
+  TPR_values[threshold] = TPR 
+  FPR_values[threshold] = FPR
+}
+
+
+
+
+
+#TPR = TP/P
+#FPR = FP/N
