@@ -101,9 +101,11 @@ recall = TP / P
 recall
 2 * precision * recall / (precision + recall) # calculates F1
 
-#Step 6, no where near finished
+#Step 6,
+#optimal_tree
 
-prob = predict(best, test, type = "vector")
+prob = predict(best, newdata = test, type = "vector")
+
 
 # Create the loss matrix
 
@@ -114,26 +116,55 @@ FPR_values = numeric(length(thresholds))
 
 for (threshold in thresholds) {# Apply threshold to predictions
   
-  pred = ifelse(prob[,"yes"] > threshold, "yes", "no") # Create confusion matrix 
-  
+  pred = ifelse(prob[, 2] > threshold, "yes", "no") # Create confusion matrix 
   new_confusion = table(test$y, pred) # Extract confusion matrix values 
   
-  TP = new_confusion["yes", "yes"] 
-  TN = new_confusion["no", "no"] 
-  FP = new_confusion["no", "yes"] 
-  FN = new_confusion["yes", "no"]
-  N = TN + FP 
-  P = FN + TP
-  TPR = TP/P
-  FPR = FP/N
-  
-  TPR_values[threshold] = TPR 
-  FPR_values[threshold] = FPR
+  transpose = t(new_confusion)
+  transpose
+  TP <- transpose[4]
+  TN <- transpose[1]
+  FN = transpose[3]
+  FP = transpose[2]
+  pos <- transpose[3] + transpose[4]
+  neg <- transpose[1] + transpose[2]
+  TPR_values <- c(TPR_values, TP / pos) 
+  FPR_values <- c(FPR_values, FP / neg)
 }
+ 
+  TPR_values
+  FPR_values
+  
+  plot(FPR_values, TPR_values, pch = 5, type = "b")
 
+  # Regression model
 
-
-
-
-#TPR = TP/P
-#FPR = FP/N
+  model = glm(y ~ ., data = train, family = "binomial")
+  prob = predict(model, newdata = test, type = "response")
+  
+  
+  thresholds = seq(0.05, 0.95, by = 0.05)
+  TPR_values = numeric(length(thresholds)) 
+  FPR_values = numeric(length(thresholds))
+  
+  for (threshold in thresholds) {# Apply threshold to predictions
+    
+    pred = ifelse(prob > threshold, "yes", "no") # Create confusion matrix 
+    new_confusion = table(test$y, pred) # Extract confusion matrix values 
+    
+    transpose = t(new_confusion)
+    transpose
+    TP <- transpose[4]
+    TN <- transpose[1]
+    FN = transpose[3]
+    FP = transpose[2]
+    pos <- transpose[3] + transpose[4]
+    neg <- transpose[1] + transpose[2]
+    TPR_values <- c(TPR_values, TP / pos) 
+    FPR_values <- c(FPR_values, FP / neg)
+  }
+    TPR_values
+    FPR_values
+  
+  plot(FPR_values, TPR_values, pch = 5, type = "b")
+  
+  
