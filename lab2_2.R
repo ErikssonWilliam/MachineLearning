@@ -131,8 +131,8 @@ for (threshold in thresholds) {# Apply threshold to predictions
   FPR_values <- c(FPR_values, FP / neg)
 }
  
-  TPR_values
-  FPR_values
+  TPR_values_tree = TPR_values  
+  FPR_values_tree = FPR_values 
   
   plot(FPR_values, TPR_values, pch = 5, type = "b")
 
@@ -168,3 +168,8 @@ for (threshold in thresholds) {# Apply threshold to predictions
   plot(FPR_values, TPR_values, pch = 5, type = "b")
   
   
+  # Plot both sets of TPR and FPR values on the same plot
+  plot(FPR_values, TPR_values, pch = 5, type = "b", col = "blue", xlab = "False Positive Rate (FPR)", ylab = "True Positive Rate (TPR)", main = "ROC Curve")
+  lines(FPR_values_tree, TPR_values_tree, pch = 5, type = "b", col = "red")
+  legend("bottomright", legend = c("Tree model", "Logistical regression"), col = c("blue", "red"), pch = 5)
+        
