@@ -18,6 +18,7 @@ U = res$loadings
 plot(U[,1], main ="Traceplot, PC1")
 top_5_indices = order(abs(U[, 1]), decreasing = TRUE)[1:5]
 top_5_values = U[top_5_indices, 1]
+top_5_values
 
 pc_scores = res$scores[, 1:2]
 pc_scores_with_violent_crimes = cbind(pc_scores, ViolentCrimesPerPop = com$ViolentCrimesPerPop) # Add ViolentCrimesPerPop to the PC scores data
@@ -55,7 +56,6 @@ test_predictions = predict(lm_model, newdata = data.frame(test_scaled))
 
 mean((train_predictions - train$ViolentCrimesPerPop) ^ 2) #Train mse
 mean((test_predictions - test$ViolentCrimesPerPop) ^ 2) #Test mse
-
 
 #Step 4
 
@@ -96,3 +96,4 @@ optimal_iteration = which.min(test_errors)
 optimal_iteration
 train_errors[optimal_iteration]
 test_errors[optimal_iteration]
+
