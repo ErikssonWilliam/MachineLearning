@@ -82,9 +82,9 @@ Var_new <- runif(500, 0, 10)
 new_data <- data.frame(Var = Var_new, Sin = sin(Var_new))
 
 tr <- mydata[1:500,] #Train all variables
+mydata
+nn <- neuralnet(Var ~., data = tr, hidden = 10, threshold = 0.1, startweights = winit, act.fct = "logistic") #Make predictions x from sin(x)
 
-nn <- neuralnet(Sin ~., data = tr, hidden = 10, threshold = 0.1, startweights = winit, act.fct = "logistic")
-
-plot(tr$Sin, tr$Var, cex=2, xlab="Sin", ylab="Var") #Make predictions x from sin(x)
+plot(tr$Sin, tr$Var, cex=2, xlab="Sin", ylab="Var") 
 points(tr$Sin, predict(nn,tr), col="red", cex=1)
 
