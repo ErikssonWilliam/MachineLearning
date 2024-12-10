@@ -87,10 +87,12 @@ for(i in 1:10){
   x_i = spam[i, -58]
   
   for(j in 1:length(sv)){
-    x_sv = spam[sv[j], -58]
+    x_sv = spam[sv[j], -58] # This line causes severe performance issues, possibly due to the large amount of data. 
+    #I think the code should be correct, 
+    #however I am unable to test it due to the performance issues...
     k2 = k2 + (co[j] * (exp(-0.05 * sum((x_sv - x_i)^2))))
   }
-  k[i] = k2 + inte
+   k[i] = k2 + inte
 }
 k
 predict(filter3,spam[1:10,-58], type = "decision")
