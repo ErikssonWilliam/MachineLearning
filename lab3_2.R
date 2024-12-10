@@ -55,6 +55,11 @@ for (i in 1:length(times)) {
   st_filtered[column_name] =  exp(-(diff^2) / h_time^2)
 }
 
+######################
+#Add plot for kernel 3
+#should you do it for each time or sum all of them??
+#####################
+
 #Sum Kernels and prod kernels
 for (i in 1:length(times)){
   column_name_time = paste("kernel_time_", times[i], sep="")
