@@ -65,18 +65,14 @@ points(te[,1],predict(nn_softplus,te), col="red", cex=1)
 Var_new <- runif(500, 0, 50) 
 new_data <- data.frame(Var = Var_new, Sin = sin(Var_new))
 
-# Random initialization of the weights in the interval [-1, 1] 
-
-winit <- runif(10, -1, 1)
-
-
-#Neuralnet with one hidden layer with 10 hidden units
-nn_new <- neuralnet(Sin ~., data = tr, hidden = 10, startweights = winit, act.fct = "logistic")
-
-
+summary(new_data)
 # Plot of the training data (black), test data (blue), and predictions (red)
-plot(tr, cex=2)
+plot(tr, cex=2, xlim =c(0,50), ylim=c(-7,1)) 
 points(te, col = "blue", cex=1)
 #new_data[,1] extracts var values.
-points(new_data[,1],predict(nn_new,new_data), col="red", cex=1)
+points(new_data[,1],predict(nn,new_data), col="red", cex=1)
+
+#Task 4
+#When Var is larger than 10 the values converge towards -6
+nn$weights
 
