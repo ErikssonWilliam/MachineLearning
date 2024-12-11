@@ -93,4 +93,4 @@ for(i in 1:10){
 }
 k
 predict(filter3,spam[1:10,-58], type = "decision")
-
+  
