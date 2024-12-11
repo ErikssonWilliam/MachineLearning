@@ -88,3 +88,4 @@ nn <- neuralnet(Var ~., data = tr, hidden = 10, threshold = 0.1, startweights = 
 plot(tr$Sin, tr$Var, cex=2, xlab="Sin", ylab="Var") 
 points(tr$Sin, predict(nn,tr), col="red", cex=1)
 
+
