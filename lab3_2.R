@@ -1,6 +1,6 @@
 rm(list = ls())
 
-set.seed(12345)
+set.seed(1234567890)
 library(geosphere)
 stations = read.csv("stations.csv", fileEncoding = "latin1")
 temps = read.csv("temps50k.csv")
@@ -12,10 +12,10 @@ h_date <- 5000
 h_time <- 2
 
 a <- 58.4274 # The point to predict (up to the students)
-b <- 14.826 #longitude and latitude
+b <- 14.826
 date <- "2013-11-04" # The date to predict (up to the students)
 
-#times <- c("04:00:00", "06:00:00", ..., "24:00:00") THIS DIDNT WORK??
+#times <- c("04:00:00", "06:00:00", ..., "24:00:00") #THIS DIDNT WORK??
 times <- seq(from = 4, to = 24, by = 2)
 temp_sum <- vector(length=length(times))
 temp_prod <- vector(length=length(times))
@@ -29,7 +29,7 @@ st_filtered = st[st$date <= date, ] #filter data to exlude future points
 distance = distHaversine(matrix(c(st_filtered$longitude, st_filtered$latitude), ncol = 2), c(b, a)) #calculates euclidean norm of x*-xi
 st_filtered$kernel_distance = exp(-(distance^2) / (h_distance^2))
 
-plot(distance, st_filtered$kernel_distance, type="o", 
+plot(distance, st_filtered$kernel_distance, type="p", 
      main="Kernel Values vs. Distance (Spatial)",
      xlab="Distance (meters)", ylab="Kernel Value",
      col="blue", pch=16)
@@ -39,7 +39,7 @@ diff = as.numeric(difftime(date, st_filtered$date, units = "days"))
 
 st_filtered$kernel_date = exp(-(diff^2) / (h_date^2))
 
-plot(diff, st_filtered$kernel_date, type="o",  ##OBS THIS LOOKS WRONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+plot(diff, st_filtered$kernel_date, type="p",
      main="Kernel Values vs. Date Difference (Temporal)",
      xlab="Days Difference", ylab="Kernel Value",
      col="blue", pch=16)
@@ -50,15 +50,18 @@ hours = as.numeric(format(as.POSIXct(st_filtered$time, format="%H:%M:%S"), "%H")
 
 for (i in 1:length(times)) {
   diff = abs(hours - times[i])
-  diff[diff > 12] = 24 - diff[diff > 12]  # Adjust for wraparound (e.g., 23:00 and 01:00 should be close)
+  diff[diff > 12] = 24 - diff[diff > 12]    # Adjust for wraparound (e.g., 23:00 and 01:00 should be close)
   column_name = paste("kernel_time_", times[i], sep="")
   st_filtered[column_name] =  exp(-(diff^2) / h_time^2)
 }
 
-######################
-#Add plot for kernel 3
-#should you do it for each time or sum all of them??
-#####################
+diff = abs(hours - times [5])
+diff[diff > 12] = 24 - diff[diff > 12]   
+plot(diff, st_filtered$kernel_time_12, type="p",
+     main="Kernel Values vs. Time Difference (Temporal)",
+     xlab="Time Difference, x* = 12", ylab="Kernel Value",
+     col="blue", pch=16)
+
 
 #Sum Kernels and prod kernels
 for (i in 1:length(times)){
