@@ -76,21 +76,18 @@ err3
 
 # 3. Implementation of SVM predictions.
 
-sv = alphaindex(filter3)[[1]]
-co = coef(filter3)[[1]]
-inte = - b(filter3)
+sv = alphaindex(filter3)[[1]] #index (/=0) of support vector
+co = coef(filter3)[[1]]       #linear coefficients of support vector
+inte = - b(filter3)           #negative intercept of linear combination
 k = numeric(10) 
+x_sv = spam[sv, -58]
 
 for(i in 1:10){ 
-  # We produce predictions for just the first 10 points in the dataset.
-  k2 = 0 #inner kernal value
+  k2 = 0 
   x_i = spam[i, -58]
   
   for(j in 1:length(sv)){
-    x_sv = spam[sv[j], -58] # This line causes severe performance issues, possibly due to the large amount of data. 
-    #I think the code should be correct, 
-    #however I am unable to test it due to the performance issues...
-    k2 = k2 + (co[j] * (exp(-0.05 * sum((x_sv - x_i)^2))))
+    k2 = k2 + (co[j] * (exp(-0.05 * sum((x_sv[j,] - x_i)^2))))
   }
    k[i] = k2 + inte
 }
