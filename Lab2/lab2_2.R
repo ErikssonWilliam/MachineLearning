@@ -1,6 +1,6 @@
 #step 1
 library(dplyr)
-bank = read.csv("./bank-full.csv", header = TRUE, sep = ";")
+bank = read.csv("./Lab2/bank-full.csv", header = TRUE, sep = ";")
 bank = bank %>% select(-duration)
 
 n = dim(bank)[1]
@@ -16,15 +16,17 @@ test = bank[id3,]
 
 # step 2
 library(tree)
-train[] <- lapply(train, function(x) if (is.character(x)) as.factor(x) else x) #make chr columns into factors or tree() fails
+train[] <- lapply(train, function(x) if (is.character(x)) as.factor(x) else x) #Make chr columns into factors (Classes) or tree() fails
 
 tree_default = tree(as.factor(y)~., data = train)
 tree_size = tree(as.factor(y)~., data = train, control = tree.control(nobs = nrow(train), minsize = 7000))
 tree_deviance = tree(as.factor(y)~., data = train, control = tree.control(nobs = nrow(train), mindev = 0.0005))
 
-summary(tree_default) #used to see missclassification error and terminal nodes 
-summary(tree_size)
-summary(tree_deviance)
+#used to see misclassification error and terminal nodes 
+
+summary(tree_default) #0.1048
+summary(tree_size) #0.1048
+summary(tree_deviance) #0.09362
 
 valid[] <- lapply(valid, function(x) if (is.character(x)) as.factor(x) else x)
 pred_default_val = predict(tree_default, valid, type = "class")
@@ -35,12 +37,24 @@ mean(pred_size_val != valid$y)
 mean(pred_deviance_val != valid$y)
 
 #step 3
-leaves = 2:50
-train_deviance = rep(0,50)
+
+#Bias is error by translating a complex problem into a simplified model, (the model's ability to capture the true relationship)
+#High bias: Oversimplifies the model, underfitting.
+
+#Variance: Model's sensitivity to small fluctuations in the training data. 
+#High Variance: Pays too much attention to the training data, capturing nosie along with the underlying pattern
+
+#As bias gets lower, the model variance gets higher. Mening the model will be very sensitive to change and will be overfitted to the data.
+#More leaves increases the complexity, leading to lower bias but higher variance
+
+leaves = 2:50 #up to 50 leaves
+train_deviance = rep(0,50) #Creates vector of length 50 filled with 0:s
 validation_deviance = rep(0,50)
 
+#Prune the tree, Pruning means removing parts of the tree that do no provide additional information
+
 for (i in 2:50) {
-  pruned = prune.tree(tree_deviance, best = i)
+  pruned = prune.tree(tree_deviance, best = i) 
   pred = predict(pruned, valid, type = "tree")
   train_deviance[i] = deviance(pruned)
   validation_deviance[i] = deviance(pred)
@@ -60,8 +74,8 @@ print(best)
 test[] = lapply(test, function(x) if (is.character(x)) as.factor(x) else x)
 pred = predict(best, test, type = "class")
 confusion_matrix = table(test$y, pred)
-confusion_matrix
-TP = confusion_matrix[2,2]
+confusion_matrix #Matrix has other structure compared to lab instructions
+TP = confusion_matrix[2,2] #[Row (Actual),Column (Predicted)]
 TN = confusion_matrix[1,1]
 FP = confusion_matrix[1,2]
 FN = confusion_matrix[2,1]
@@ -77,12 +91,22 @@ recall = TP / P
 #Step 5
 
 prob = predict(best, test, type = "vector")
+prob
 
-# Create the loss matrix
+# Create the loss matrix alternative A
 
 pred = ifelse(prob[,"yes"]/prob[,"no"]>=1/5, "yes", "no")
-new_confusion= table(test$y, pred) #something is wrong here
+new_confusion= table(test$y, pred) 
 new_confusion
+
+#Alternative B
+
+LossMatrix = prob%*%matrix(c(0,1,5,0), byrow = TRUE, nrow = 2)
+#matrix(c(0,1,5,0),byrow=TRUE, nrow = 2) 
+#Ensure right matrix is used
+bestI = apply(LossMatrix, MARGIN=1, FUN = which.min) #Margin = 1, function is applied to each row. Margin = 2 indicates rows
+Pred=levels(test$y)[bestI]
+table(test$y, Pred)
 
 summary(test$y)
 

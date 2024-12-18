@@ -1,6 +1,6 @@
 #Assignment 1
 
-tecator = read.csv("./tecator.csv", header = TRUE)
+tecator = read.csv("./Lab2/tecator.csv", header = TRUE)
 n = dim(tecator)[1]
 set.seed(12345)
 id = sample(1:n, floor(n*0.5))
@@ -56,7 +56,7 @@ lambda_seq = lasso$lambda
 nonzero_coefs = sapply(lambda_seq, function(l) sum(coef(lasso, s = l) != 0)) 
 #sapply applies a function over a vector
 #Function(l) specifies that the function is specified within another function
-#sum(coeff (lasso, s=l) != 0), countes the number of values indiciting that the coefficient in non zeros 
+#sum(coeff (lasso, s=l) != 0), counts the number of values indicating that the coefficient is non-zero 
 
 lambda_three_features = lambda_seq[which(nonzero_coefs == 4)][1]
 # Find the lambda that corresponds to exactly three non-zero coefficients, == 4[1] to include the intercept term
