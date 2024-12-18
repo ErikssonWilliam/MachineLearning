@@ -192,8 +192,16 @@ for (threshold in thresholds) {# Apply threshold to predictions
   plot(FPR_values, TPR_values, pch = 5, type = "b")
   
   
-  # Plot both sets of TPR and FPR values on the same plot
-  plot(FPR_values, TPR_values, pch = 5, type = "b", col = "blue", xlab = "False Positive Rate (FPR)", ylab = "True Positive Rate (TPR)", main = "ROC Curve")
-  lines(FPR_values_tree, TPR_values_tree, pch = 5, type = "b", col = "red")
-  legend("bottomright", legend = c("Tree model", "Logistical regression"), col = c("blue", "red"), pch = 5)
-        
+
+  # Plot the ROC curve for logistic regression
+  plot(FPR_values, TPR_values, type = "l", col = "blue", xlab = "False Positive Rate (FPR)", ylab = "True Positive Rate (TPR)", main = "ROC Curve")
+  
+  # Add the ROC curve for the tree model
+  lines(FPR_values_tree, TPR_values_tree, type = "l", col = "red")
+  
+  # Add the y = x line
+  abline(a = 0, b = 1, col = "black", lty = 2)
+  
+  # Add a legend
+  legend("bottomright", legend = c("Tree model", "Logistic regression", "y = x"), col = c("red", "blue", "black"), lty = c(1, 1, 2))
+  

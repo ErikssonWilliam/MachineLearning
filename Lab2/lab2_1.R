@@ -18,21 +18,41 @@ df=train%>%select(Channel1:Fat)
 m1=lm(Fat~.,df)
 summary(m1)
 
-#Training error
+################################################
+#Using MSE
+df_train=train%>%select(Channel1:Fat)
+df_test=test%>%select(Channel1:Fat)
+m1=lm(Fat~.,df)
+summary(m1)
 
-Pred=m1$fitted.values
-confusion_table_train = table(train$Fat, Pred)
-train$Fat
-Pred
-train_error = (1- sum(diag(confusion_table_train)) / sum(confusion_table_train))
-train_error
+pred_train = predict(m1, type = "response")
+pred_test = predict(m1, df_test, type = "response")
+
+MSE_train = mean((df_train$Fat - pred_train)^2)
+MSE_test = mean((df_test$Fat - pred_test)^2)
+
+MSE_train
+MSE_test
+
+################################################
+
+#OLD WRONG CODE BELOW
+
+#Training error, USE MSE error
+
+#Pred=m1$fitted.values
+#confusion_table_train = table(train$Fat, Pred)
+#train$Fat
+#Pred
+#train_error = (1- sum(diag(confusion_table_train)) / sum(confusion_table_train))
+#train_error
 
 #Testing error
 
-Pred=m1$fitted.values
-confusion_table_test = table(test$Fat, Pred) #TP, TN, FP, FN
-test_error = (1- sum(diag(confusion_table_test)) / sum(confusion_table_test)) #FP + FN/ Total predictions
-test_error
+#Pred=m1$fitted.values
+#confusion_table_test = table(test$Fat, Pred) #TP, TN, FP, FN
+#test_error = (1- sum(diag(confusion_table_test)) / sum(confusion_table_test)) #FP + FN/ Total predictions
+#test_error
 
 #Step 2
 
@@ -74,6 +94,8 @@ ridge = glmnet(x_train, y_train, family = "gaussian", #Gaussian, implies that fa
 plot(ridge, xvar = "lambda", label = TRUE) 
 
 #Step 5
+
+#Set seed again!
 
 x_train = as.matrix(train %>% select(starts_with("Channel")))
 y_train = train$Fat
